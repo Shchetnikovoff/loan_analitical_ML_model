@@ -10,3 +10,6 @@ __pycache__/
 .ipynb_checkpoints/
 .env
 venv/
+
+# Old notebooks
+notebooks/obesity_risk_prediction.ipynb

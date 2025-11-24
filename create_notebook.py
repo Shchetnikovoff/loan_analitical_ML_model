@@ -6,14 +6,14 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Obesity Risk Prediction - Case 9\n",
+    "# Credit Risk Prediction - Case 9\n",
     "\n",
     "## 1. Introduction\n",
-    "This notebook implements a machine learning model to predict obesity risk based on the Kaggle Playground Series S4E2 dataset. \n",
+    "This notebook implements a machine learning model to predict credit risk based on client data. \n",
     "It follows the specific requirements for **Case 9**, which mandates the use of **Gradient Boosting Classifier** with hyperparameter tuning via **GridSearchCV**.\n",
     "\n",
     "### Dataset\n",
-    "The dataset consists of estimation of obesity levels based on eating habits and physical condition."
+    "The dataset contains client information including financial and personal indicators to predict credit approval risk."
    ]
   },
   {
@@ -74,8 +74,8 @@ notebook_content = {
    "source": [
     "# Target Variable Distribution\n",
     "plt.figure(figsize=(10, 6))\n",
-    "sns.countplot(y='NObeyesdad', data=train_df, order=train_df['NObeyesdad'].value_counts().index)\n",
-    "plt.title('Distribution of Obesity Levels')\n",
+    "sns.countplot(y='Credit_Risk', data=train_df, order=train_df['Credit_Risk'].value_counts().index)\n",
+    "plt.title('Distribution of Credit Risk')\n",
     "plt.show()"
    ]
   },
@@ -86,7 +86,7 @@ notebook_content = {
    "outputs": [],
    "source": [
     "# Numerical Features Distribution\n",
-    "numerical_cols = ['Age', 'Height', 'Weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'TUE']\n",
+    "numerical_cols = ['Age', 'Income', 'Credit_Amount', 'Loan_Duration', 'Debt_to_Income', 'Credit_Score', 'Num_Credits', 'Savings_Account_Balance']\n",
     "train_df[numerical_cols].hist(bins=15, figsize=(15, 10))\n",
     "plt.suptitle('Distribution of Numerical Features')\n",
     "plt.show()"
@@ -105,17 +105,17 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "X = train_df.drop(['id', 'NObeyesdad'], axis=1)\n",
-    "y = train_df['NObeyesdad']\n",
-    "X_test_raw = test_df.drop(['id'], axis=1)\n",
+    "X = train_df.drop(['ID', 'Credit_Risk'], axis=1)\n",
+    "y = train_df['Credit_Risk']\n",
+    "X_test_raw = test_df.drop(['ID'], axis=1)\n",
     "\n",
     "# Encode Target\n",
     "le = LabelEncoder()\n",
     "y_encoded = le.fit_transform(y)\n",
     "\n",
     "# Define Preprocessing Pipeline\n",
-    "numerical_cols = ['Age', 'Height', 'Weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'TUE']\n",
-    "categorical_cols = ['Gender', 'family_history_with_overweight', 'FAVC', 'CAEC', 'SMOKE', 'SCC', 'CALC', 'MTRANS']\n",
+    "numerical_cols = ['Age', 'Income', 'Credit_Amount', 'Loan_Duration', 'Debt_to_Income', 'Credit_Score', 'Num_Credits', 'Savings_Account_Balance']\n",
+    "categorical_cols = ['Gender', 'Employment_Status', 'Education_Level', 'Marital_Status', 'Housing_Type', 'Loan_Purpose']\n",
     "\n",
     "numerical_transformer = Pipeline(steps=[\n",
     "    ('imputer', SimpleImputer(strategy='median')),\n",
@@ -216,9 +216,75 @@ notebook_content = {
     "predictions = best_model.predict(X_test_processed)\n",
     "predictions_decoded = le.inverse_transform(predictions)\n",
     "\n",
-    "submission = pd.DataFrame({'id': test_df['id'], 'NObeyesdad': predictions_decoded})\n",
+    "submission = pd.DataFrame({'ID': test_df['ID'], 'Credit_Risk': predictions_decoded})\n",
     "submission.to_csv('../submission.csv', index=False)\n",
     "print(\"Submission saved to submission.csv\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 8. Credit Risk Predict for New Client"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Function to predict credit risk for a new client\n",
+    "def predict_credit_risk(client_data, model, preprocessor, label_encoder):\n",
+    "    # Preprocess the client data\n",
+    "    client_df = pd.DataFrame([client_data])\n",
+    "    client_processed = preprocessor.transform(client_df)\n",
+    "    \n",
+    "    # Predict\n",
+    "    prediction = model.predict(client_processed)[0]\n",
+    "    prediction_proba = model.predict_proba(client_processed)[0]\n",
+    "    \n",
+    "    # Decode prediction\n",
+    "    risk_label = label_encoder.inverse_transform([prediction])[0]\n",
+    "    \n",
+    "    return risk_label, prediction_proba\n",
+    "\n",
+    "# Example usage with sample data\n",
+    "sample_client = {\n",
+    "    'Age': 35,\n",
+    "    'Income': 50000,\n",
+    "    'Credit_Amount': 10000,\n",
+    "    'Loan_Duration': 12,\n",
+    "    'Debt_to_Income': 0.3,\n",
+    "    'Credit_Score': 650,\n",
+    "    'Num_Credits': 1,\n",
+    "    'Savings_Account_Balance': 5000,\n",
+    "    'Gender': 'Male',\n",
+    "    'Employment_Status': 'Employed',\n",
+    "    'Education_Level': 'Bachelor',\n",
+    "    'Marital_Status': 'Married',\n",
+    "    'Housing_Type': 'Own',\n",
+    "    'Loan_Purpose': 'Home'\n",
+    "}\n",
+    "\n",
+    "print(\"Sample prediction for a new client:\")\n",
+    "try:\n",
+    "    risk, probabilities = predict_credit_risk(sample_client, best_model, preprocessor, le)\n",
+    "    print(f\"Predicted Credit Risk: {risk}\")\n",
+    "    print(f\"Prediction Probabilities: {probabilities}\")\n",
+    "    \n",
+    "    # Provide recommendation based on risk\n",
+    "    print(\"Recommendation:\")\n",
+    "    if risk == 'Low':\n",
+    "        print(\"  OK Credit can be issued - low risk\")\n",
+    "    elif risk == 'Medium':\n",
+    "        print(\"  ? Credit can be issued with caution - medium risk\")\n",
+    "    else:\n",
+    "        print(\"  X Deny credit - high risk\")\n",
+    "        \n",
+    "except Exception as e:\n",
+    "    print(f\"Error during prediction: {e}\")\n",
+    "    print(\"Note: This might fail if the sample client data format doesn't match the training data.\")"
    ]
   }
  ],
@@ -245,5 +311,5 @@ notebook_content = {
  "nbformat_minor": 4
 }
 
-with open('notebooks/obesity_risk_prediction.ipynb', 'w') as f:
+with open('notebooks/credit_risk_prediction.ipynb', 'w') as f:
     json.dump(notebook_content, f, indent=1)
