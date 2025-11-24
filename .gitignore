@@ -1,0 +1,12 @@
+# Data
+data/
+*.csv
+*.xlsx
+ТЗ и фалы/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+venv/

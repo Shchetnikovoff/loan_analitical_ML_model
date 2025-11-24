@@ -1,0 +1,249 @@
+import json
+
+notebook_content = {
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Obesity Risk Prediction - Case 9\n",
+    "\n",
+    "## 1. Introduction\n",
+    "This notebook implements a machine learning model to predict obesity risk based on the Kaggle Playground Series S4E2 dataset. \n",
+    "It follows the specific requirements for **Case 9**, which mandates the use of **Gradient Boosting Classifier** with hyperparameter tuning via **GridSearchCV**.\n",
+    "\n",
+    "### Dataset\n",
+    "The dataset consists of estimation of obesity levels based on eating habits and physical condition."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "from sklearn.model_selection import train_test_split, GridSearchCV\n",
+    "from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder\n",
+    "from sklearn.impute import SimpleImputer\n",
+    "from sklearn.compose import ColumnTransformer\n",
+    "from sklearn.pipeline import Pipeline\n",
+    "from sklearn.ensemble import GradientBoostingClassifier\n",
+    "from sklearn.metrics import accuracy_score, classification_report, confusion_matrix\n",
+    "\n",
+    "# Set plot style\n",
+    "sns.set(style=\"whitegrid\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2. Data Loading"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "train_df = pd.read_csv('../data/train.csv')\n",
+    "test_df = pd.read_csv('../data/test.csv')\n",
+    "\n",
+    "print(f\"Train shape: {train_df.shape}\")\n",
+    "print(f\"Test shape: {test_df.shape}\")\n",
+    "train_df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Exploratory Data Analysis (EDA)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Target Variable Distribution\n",
+    "plt.figure(figsize=(10, 6))\n",
+    "sns.countplot(y='NObeyesdad', data=train_df, order=train_df['NObeyesdad'].value_counts().index)\n",
+    "plt.title('Distribution of Obesity Levels')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Numerical Features Distribution\n",
+    "numerical_cols = ['Age', 'Height', 'Weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'TUE']\n",
+    "train_df[numerical_cols].hist(bins=15, figsize=(15, 10))\n",
+    "plt.suptitle('Distribution of Numerical Features')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 4. Data Preprocessing"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = train_df.drop(['id', 'NObeyesdad'], axis=1)\n",
+    "y = train_df['NObeyesdad']\n",
+    "X_test_raw = test_df.drop(['id'], axis=1)\n",
+    "\n",
+    "# Encode Target\n",
+    "le = LabelEncoder()\n",
+    "y_encoded = le.fit_transform(y)\n",
+    "\n",
+    "# Define Preprocessing Pipeline\n",
+    "numerical_cols = ['Age', 'Height', 'Weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'TUE']\n",
+    "categorical_cols = ['Gender', 'family_history_with_overweight', 'FAVC', 'CAEC', 'SMOKE', 'SCC', 'CALC', 'MTRANS']\n",
+    "\n",
+    "numerical_transformer = Pipeline(steps=[\n",
+    "    ('imputer', SimpleImputer(strategy='median')),\n",
+    "    ('scaler', StandardScaler())\n",
+    "])\n",
+    "\n",
+    "categorical_transformer = Pipeline(steps=[\n",
+    "    ('imputer', SimpleImputer(strategy='most_frequent')),\n",
+    "    ('encoder', OneHotEncoder(handle_unknown='ignore'))\n",
+    "])\n",
+    "\n",
+    "preprocessor = ColumnTransformer(\n",
+    "    transformers=[\n",
+    "        ('num', numerical_transformer, numerical_cols),\n",
+    "        ('cat', categorical_transformer, categorical_cols)\n",
+    "    ])\n",
+    "\n",
+    "# Split Data\n",
+    "X_train, X_val, y_train, y_val = train_test_split(X, y_encoded, test_size=0.2, random_state=42)\n",
+    "\n",
+    "# Apply Preprocessing\n",
+    "X_train_processed = preprocessor.fit_transform(X_train)\n",
+    "X_val_processed = preprocessor.transform(X_val)\n",
+    "X_test_processed = preprocessor.transform(X_test_raw)\n",
+    "\n",
+    "print(\"Preprocessing complete.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 5. Modeling (Case 9)\n",
+    "**Algorithm**: Gradient Boosting Classifier\n",
+    "**Hyperparameters**:\n",
+    "- `n_estimators`: [50, 100, 200]\n",
+    "- `learning_rate`: [0.01, 0.1, 0.2]\n",
+    "- `max_depth`: [3, 5, 7]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gbc = GradientBoostingClassifier(random_state=42)\n",
+    "\n",
+    "param_grid = {\n",
+    "    'n_estimators': [50, 100, 200],\n",
+    "    'learning_rate': [0.01, 0.1, 0.2],\n",
+    "    'max_depth': [3, 5, 7]\n",
+    "}\n",
+    "\n",
+    "grid_search = GridSearchCV(estimator=gbc, param_grid=param_grid, cv=3, scoring='accuracy', verbose=2, n_jobs=-1)\n",
+    "grid_search.fit(X_train_processed, y_train)\n",
+    "\n",
+    "best_model = grid_search.best_estimator_\n",
+    "best_params = grid_search.best_params_\n",
+    "\n",
+    "print(f\"Best Parameters: {best_params}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 6. Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_pred = best_model.predict(X_val_processed)\n",
+    "acc = accuracy_score(y_val, y_pred)\n",
+    "\n",
+    "print(f\"Validation Accuracy: {acc:.4f}\")\n",
+    "print(\"\\nClassification Report:\")\n",
+    "print(classification_report(y_val, y_pred, target_names=le.classes_))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 7. Submission"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "predictions = best_model.predict(X_test_processed)\n",
+    "predictions_decoded = le.inverse_transform(predictions)\n",
+    "\n",
+    "submission = pd.DataFrame({'id': test_df['id'], 'NObeyesdad': predictions_decoded})\n",
+    "submission.to_csv('../submission.csv', index=False)\n",
+    "print(\"Submission saved to submission.csv\")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
+
+with open('notebooks/obesity_risk_prediction.ipynb', 'w') as f:
+    json.dump(notebook_content, f, indent=1)
