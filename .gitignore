@@ -1,0 +1,15 @@
+# Data
+data/
+*.csv
+*.xlsx
+ТЗ и фалы/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+venv/
+
+# Old notebooks
+notebooks/obesity_risk_prediction.ipynb
