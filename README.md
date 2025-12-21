@@ -1,101 +1,101 @@
-# Loan Approval Prediction - Kaggle Competition
+# Прогнозирование одобрения кредита - Kaggle Competition
 
-## Overview
-This project implements a machine learning system to predict loan approval status based on client financial and personal data for the Kaggle Playground Series S4E10 competition. The system uses Gradient Boosting Classifier with hyperparameter tuning via GridSearchCV.
+## Описание
+Проект реализует систему машинного обучения для предсказания статуса одобрения кредита на основе финансовых и персональных данных клиента для соревнования Kaggle Playground Series S4E10. Система использует Gradient Boosting Classifier с настройкой гиперпараметров через GridSearchCV.
 
-## Features
-- **Machine Learning Model**: Gradient Boosting Classifier with GridSearchCV hyperparameter tuning
-- **Interactive Interface**: Command-line interface for credit risk assessment of new clients
-- **Comprehensive Pipeline**: Includes data preprocessing, model training, evaluation, and prediction
-- **Risk Categories**: Low, Medium, and High risk classification
+## Возможности
+- **Модель машинного обучения**: Gradient Boosting Classifier с настройкой гиперпараметров через GridSearchCV
+- **Интерактивный интерфейс**: Консольный интерфейс для оценки кредитного риска новых клиентов
+- **Полный пайплайн**: Включает предобработку данных, обучение модели, оценку и предсказания
+- **Категории риска**: Низкий, средний и высокий риск
 
-## Results
-- **Validation Accuracy**: 95.17%
-- **Validation ROC-AUC**: 95.76%
-- **Best Parameters**:
+## Результаты
+- **Точность на валидации**: 95.17%
+- **ROC-AUC на валидации**: 95.76%
+- **Лучшие параметры**:
   - learning_rate: 0.1
   - max_depth: 5
   - n_estimators: 200
 
-## Setup
-1.  **Install dependencies**:
+## Установка
+1.  **Установить зависимости**:
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  **Download Kaggle data**:
-    - Download competition data from: https://www.kaggle.com/competitions/playground-series-s4e10/data
-    - Place `train.csv` and `test.csv` in `data/playground-series-s4e10/`
+2.  **Скачать данные Kaggle**:
+    - Скачайте данные соревнования: https://www.kaggle.com/competitions/playground-series-s4e10/data
+    - Поместите `train.csv` и `test.csv` в `data/playground-series-s4e10/`
 
-## Usage
+## Использование
 
-### 1. Interactive Credit Risk Assessment
-Run the interactive client interface:
+### 1. Интерактивная оценка кредитного риска
+Запустите интерактивный интерфейс:
 ```bash
 python credit_risk_interface.py
 ```
-This will allow you to input client data and get credit risk predictions.
+Позволяет вводить данные клиента и получать предсказания кредитного риска.
 
-### 2. Training and Submission
-To train the model and generate a submission:
+### 2. Обучение и создание submission
+Для обучения модели и генерации файла submission:
 ```bash
 cd src
 python train.py
 ```
 
-### 3. Generate Jupyter Notebook
-To generate the analysis notebook:
+### 3. Создание Jupyter Notebook
+Для генерации аналитического ноутбука:
 ```bash
 python create_notebook.py
 ```
 
-### 4. Validate Full System
-To run a comprehensive test of the system:
+### 4. Полное тестирование системы
+Для запуска комплексного теста:
 ```bash
 python test_full_system.py
 ```
 
-## Project Structure
--   `data/`: Contains train.csv and test.csv with credit risk data
--   `src/`: Source code for preprocessing and modeling
-    -   `model.py`: Machine learning model implementation
-    -   `preprocessing.py`: Data preprocessing functions
-    -   `train.py`: Main training script
--   `notebooks/`: Jupyter notebooks for EDA and credit risk analysis
--   `submission.csv`: Generated submission file
--   `create_notebook.py`: Script to generate the Jupyter notebook
--   `credit_risk_interface.py`: Interactive client interface
--   `generate_data.py`: Script to create synthetic credit risk data
--   `test_full_system.py`: Comprehensive system testing script
+## Структура проекта
+-   `data/`: Содержит train.csv и test.csv с данными о кредитном риске
+-   `src/`: Исходный код для предобработки и моделирования
+    -   `model.py`: Реализация модели машинного обучения
+    -   `preprocessing.py`: Функции предобработки данных
+    -   `train.py`: Основной скрипт обучения
+-   `notebooks/`: Jupyter ноутбуки для анализа данных
+-   `submission.csv`: Сгенерированный файл submission
+-   `create_notebook.py`: Скрипт для создания Jupyter ноутбука
+-   `credit_risk_interface.py`: Интерактивный интерфейс клиента
+-   `generate_data.py`: Скрипт для создания синтетических данных
+-   `test_full_system.py`: Скрипт комплексного тестирования
 
-## Case 9 Requirements Implementation
-✅ **Algorithm**: Gradient Boosting Classifier
-✅ **Hyperparameter Tuning**: GridSearchCV with parameter grid
-✅ **Data Preprocessing**: Numerical and categorical feature handling
-✅ **Model Evaluation**: Accuracy metrics and classification report
-✅ **Interactive Interface**: For client credit risk assessment
+## Реализация требований задания
+✅ **Алгоритм**: Gradient Boosting Classifier
+✅ **Настройка гиперпараметров**: GridSearchCV с сеткой параметров
+✅ **Предобработка данных**: Обработка числовых и категориальных признаков
+✅ **Оценка модели**: Метрики точности и classification report
+✅ **Интерактивный интерфейс**: Для оценки кредитного риска клиентов
 
-## Credit Risk Categories
-- **Low**: Very low risk, credit can be issued
-- **Medium**: Moderate risk, credit can be issued with caution
-- **High**: High risk, credit should be denied
+## Категории кредитного риска
+- **Низкий**: Очень низкий риск, кредит может быть выдан
+- **Средний**: Умеренный риск, кредит может быть выдан с осторожностью
+- **Высокий**: Высокий риск, в кредите следует отказать
 
-## Input Features (Kaggle Dataset)
+## Признаки (Kaggle Dataset)
 
-**Numerical (7 features)**:
-- person_age: Age of the person
-- person_income: Annual income
-- person_emp_length: Employment length in years
-- loan_amnt: Loan amount
-- loan_int_rate: Loan interest rate
-- loan_percent_income: Loan amount as percentage of income
-- cb_person_cred_hist_length: Credit history length in years
+**Числовые признаки (7)**:
+- person_age: Возраст человека
+- person_income: Годовой доход
+- person_emp_length: Стаж работы в годах
+- loan_amnt: Сумма кредита
+- loan_int_rate: Процентная ставка по кредиту
+- loan_percent_income: Сумма кредита в процентах от дохода
+- cb_person_cred_hist_length: Длина кредитной истории в годах
 
-**Categorical (4 features)**:
-- person_home_ownership: Home ownership status (RENT, OWN, MORTGAGE)
-- loan_intent: Loan purpose (EDUCATION, MEDICAL, PERSONAL, VENTURE, DEBTCONSOLIDATION, HOMEIMPROVEMENT)
-- loan_grade: Loan grade (A, B, C, D, E, F)
-- cb_person_default_on_file: Default history (Y/N)
+**Категориальные признаки (4)**:
+- person_home_ownership: Статус владения жильем (RENT, OWN, MORTGAGE)
+- loan_intent: Цель кредита (EDUCATION, MEDICAL, PERSONAL, VENTURE, DEBTCONSOLIDATION, HOMEIMPROVEMENT)
+- loan_grade: Класс кредита (A, B, C, D, E, F)
+- cb_person_default_on_file: История дефолтов (Y/N)
 
-**Target Variable**:
-- loan_status: 0 = no default, 1 = default
+**Целевая переменная**:
+- loan_status: 0 = без дефолта, 1 = дефолт
